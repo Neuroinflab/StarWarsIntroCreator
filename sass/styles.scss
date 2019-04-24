@@ -127,6 +127,22 @@ button::-moz-focus-inner {
     transform-origin: 50% 100%;
     @include transform(perspective(300px) rotateX(25deg));
 
+    @media screen and (min-width: 1920px) and (max-width: 1920px) {
+              // and (min-height: 1080px) and (max-height: 1080px) {
+        zoom: 1.9;
+        @include transform(perspective(266px) rotateX(29deg) scaleX(1.2));
+    }
+
+    @media screen and (min-width: 1366px) and (max-width: 1366px) {
+        zoom: 1.5;
+        @include transform(perspective(216px) rotateX(26deg));
+    }
+
+    @media screen and (min-width: 1280px) and (max-width: 1280px) {
+        zoom: 1.5;
+        @include transform(perspective(216px) rotateX(26deg));
+    }
+
     > div {
         position: absolute;
         top: 100%;
@@ -267,12 +283,13 @@ button::-moz-focus-inner {
   input,textarea {
     width: 97%;
     margin-bottom: 0px;
-    padding: 0.25em;
-    border: 0.25em solid transparentize($titlesColor, 0.8);
-    border-radius: 0.2em;
+    padding: 0.3em;
+    border: 3px solid transparentize($titlesColor, 0.8);
+    border-radius: 3px;
     background: black;
     color: $titlesColor;
     transition: border-color 0.7s ease-out;
+    overflow-x: hidden;
 
     &:active, &:focus {
       border-color: $titlesColor;
@@ -294,7 +311,6 @@ button::-moz-focus-inner {
         // width: 481.66px;
         width: 93%;
         @include stroke(2,$titlesColor);
-        margin-bottom: -20px;
       }
 
       &#f-text{
@@ -706,4 +722,35 @@ iframe{
   margin-bottom: 1.6em;
   margin-top: 3.5em;
   text-transform: uppercase;
+}
+
+#playBut{
+  z-index: 1000;
+}
+
+.sweet-alert {
+  box-sizing : border-box;
+  max-height : 100% !important;
+  overflow-y : auto !important;
+  padding : 0 17px 17px !important;
+  width : 512px !important;
+}
+.sweet-alert:before {
+  content : "";
+  display : block;
+  height : 17px;
+  width : 0;
+}
+
+#btcether {
+  &:hover {
+      text-decoration: underline;
+      cursor: pointer;
+  }
+  font-weight: bold;
+  display: flex;
+  line-height: 25px;
+  span {
+      margin-left: 5px;
+  }
 }

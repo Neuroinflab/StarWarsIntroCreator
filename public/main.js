@@ -60,10 +60,10 @@ $('#form-starwars').submit(function(event) {
 
   if(!isOpeningsDifferents(opening,defaultOpening)){
       setLoading();
-      location.hash = '!/Episode7'; // the default is Episode7 opening, TODO change this in 2018 after Episode 8
+      location.hash = '!/Episode8';
       return;
   }
-  
+
   var aLogo = opening.logo.split('\n');
   if(aLogo.length > 2){
       sweetAlert("Oops...", "Logo can't have more than 2 lines.", "warning");
@@ -93,7 +93,8 @@ $('#form-starwars').submit(function(event) {
           var key = 'A'+data.name.substring(1);
           CreatedIntros.save(key,opening);
           location.hash = '!/'+key;
-      }
+      },
+      error: ajaxErrorFunction('Error when creating the intro.\n\n'+JSON.stringify(opening))
   });
 });
 
@@ -139,7 +140,7 @@ $(window).on('hashchange', function() {
                 intro = intro.replace(/\n/g,"<br>");
                 StarWars.animation.find("#intro").html(intro);
                 StarWars.animation.find("#episode").text(opening.episode);
-                
+
                 var title = StarWars.animation.find("#title")
                 if(checkCompatibleSWFont(opening.title)){
                     title.addClass('SWFont');
@@ -215,7 +216,8 @@ $(window).on('hashchange', function() {
                     });
                 }
 
-            }
+            },
+            error: ajaxErrorFunction('Error when try to load the intro '+key)
             });
         }catch(error){
             location.hash = "";
@@ -296,6 +298,8 @@ function validateEmail(email) {
     return re.test(email);
 }
 
+var termsOfServiceText = 'By using this website you are agreeing to our <a style="color: #ffd54e;font-weight:bold;" href="termsOfService.html" target="_blank">Terms of Service</a>.';
+
 var requestVideo = function(donate, email){
     if(email === false) return false;
     if (!validateEmail(email)) {
@@ -327,9 +331,10 @@ var requestVideo = function(donate, email){
                   ) :
                   ''
               ) +
-              '<p style="text-align: justify;margin-top: 15px;">By using this website you are agreeing to our <a style="color: #ffd54e;text-decoration:none;font-weight:bold;" href="termsOfService.html" target="_blank">Terms of Service</a>.</p>'
+              '<p style="text-align: justify;margin-top: 15px;">'+termsOfServiceText+'</p>'
             });
-        }
+        },
+        error: ajaxErrorFunction('Error when request video download.')
     });
 
 };
@@ -355,7 +360,13 @@ $("#videoButton").click(function(){
         });
         return;
     }
-
+    // swal({
+    //     html: true,
+    //     title: '<h2 style="font-family: StarWars;">loading</h2>',
+    //     text: '<iframe src="./atat.html" height="200px"></iframe>',
+    //     animation: "slide-from-top",
+    //     showConfirmButton: false
+    // });
     $.ajax({
             url: "https://endor.nihey.org/status?code="+OpeningKey,
             crossDomain: true,
@@ -378,10 +389,10 @@ $("#videoButton").click(function(){
                         'There are <b>'+(queue+1)+' videos</b> in front of you and it will take <b>'+calcTime(queue)+'</b> to be processed.<br><br>'+
                         'Can\'t wait for it? Donate at least <b>5 US Dollars</b>, you will jump the queue and your video will be ready in few hours.<br>'+
                         'The video will be rendered in HD quality and MP4 file. To see a sample video click '+
-                        '<a style="color: #ffd54e;text-decoration:none;font-weight:bold;" href="https://www.youtube.com/watch?v=IQf8AN07T_E" target="_blank">here</a>.'+
+                        '<a style="color: #ffd54e;font-weight:bold;" href="https://www.youtube.com/watch?v=IQf8AN07T_E" target="_blank">here</a>.'+
                         'Donate at least <b>10 US Dollars</b> and you will get the video in <b>Full HD resolution (1920x1080)</b><br><br>'+
                         '<b>Attention!</b> Make sure there are no typos in your text, there will be no correction after the video rendering.<br>'+
-                        'By using this website you are agreeing to our <a style="color: #ffd54e;text-decoration:none;font-weight:bold;" href="termsOfService.html" target="_blank">Terms of Service</a>.'+
+                        termsOfServiceText+
                         '</p>'+
                         '<iframe src="./atat.html" height="200px"></iframe>',
                           showCancelButton: true,
@@ -390,22 +401,21 @@ $("#videoButton").click(function(){
                           cancelButtonText: "No, I'll get in the queue!",
                           closeOnConfirm: false,
                           closeOnCancel: false,
-                          animation: "slide-from-top"
+                          animation: false
                     },function(donate){
 
                         var generateAlert = {
                             html: true,
                             title: '<h2 style="font-family: StarWars;">Generate video</h2>',
                             text: '<p style="text-align: justify">'+
-                            'Type your email bellow and you will receive a message with the URL to download your video when it\'s ready. We promise not to send spam!'+
+                            'Type your email below and you will receive a message with the URL to download your video when it\'s ready. We promise not to send spam!'+
                             '</p>' + (donate ? [
-                              '<p style="text-align: justify">',
+                              '<br><p style="text-align: justify">',
                               '  Please, use the same email from you PayPal account.',
-                              "  You'll be able to add as many e-mails as you want to",
-                              '  <b>this video</b> without having to donate again. Just add',
-                              '  your other emails after the first one, without donating.',
-                              '  Attention! Make sure there are no typos in your text, you will need to request a new video download and donate again.',
-                              '  By using this website you are agreeing to our <a style="color: #ffd54e;text-decoration:none;font-weight:bold;" href="termsOfService.html" target="_blank">Terms of Service</a>.',
+                              "  If you want to receive in another e-mail too, click on download button again and add more e-mails. You don't need to donate again.",
+                              '  <br><br>',
+                              '  Attention! Make sure there are no typos in your text, you will need to request a new video download and donate again.<br><br>',
+                              '  '+termsOfServiceText,
                               '</p>',
                             ].join('') : ''),
                             type: 'input',
@@ -417,13 +427,14 @@ $("#videoButton").click(function(){
 
                         if(donate){
                             generateAlert.title = '<h2 style="font-family: StarWars;">Donate</h2>';
-                            generateAlert.text = 'Click on the button bellow:'
+                            generateAlert.text = 'Click on the button below:'
                             +'<br><iframe src="./donateButtons.html#!/' + OpeningKey + '" height="100"></iframe>'+generateAlert.text;
                         }
                         swal(generateAlert, requestVideo.bind(window, donate));
                     });
             }
-        }
+        },
+        error: ajaxErrorFunction('Error when request video information to download.')
     });
 
 });
@@ -456,10 +467,12 @@ function isOpeningsDifferents(a,b){ // compare two openings texts to see if they
     },false);
 };
 
-function parseSpecialKeys(key){ 
+function parseSpecialKeys(key){
     switch (key) {
         case "Episode7": // Episode7 is a special key for URL, it plays the Episode 7 opening
             return "AKcKeYMPogupSU_r1I_g";
+        case "Episode8":
+            return "AL6yNfOxCGkHKBUi54xp";
         // TODO other eps
         default:
             return key;
